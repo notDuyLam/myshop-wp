@@ -2,6 +2,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using myshop.Services;
+using myshop.ViewModels;
+using myshop_data.Data;
 using Windows.ApplicationModel.Activation;
 
 namespace myshop
@@ -43,6 +45,8 @@ namespace myshop
 
             // DbContext will be registered later when we have connection string
             // For now, we'll create it on-demand in services
+            services.AddTransient<ConfigViewModel>();
+            services.AddTransient<ProductsViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
         }
