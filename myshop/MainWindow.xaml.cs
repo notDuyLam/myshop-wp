@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using myshop.Helpers;
 using myshop.Services;
 using myshop.Views;
 
@@ -18,6 +19,9 @@ namespace myshop
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Register this window with WindowHelper
+            WindowHelper.RegisterWindow(this);
             
             // Get NavigationService from DI
             _navigationService = App.ServiceProvider?.GetService<NavigationService>() 

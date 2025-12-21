@@ -8,13 +8,39 @@
     mc:Ignorable="d">
 
     <ScrollViewer>
-        <StackPanel Padding="40" MaxWidth="600">
+        <StackPanel Padding="40" MaxWidth="600" Spacing="20">
             <TextBlock Text="Cài đặt" 
                       FontSize="32" 
                       FontWeight="Bold"/>
             
-            <TextBlock Text="UI sẽ được implement trong tuần 5" 
-                      Foreground="Gray"/>
+            <Button Content="Cấu hình Server" 
+                   Click="ConfigServerButton_Click"
+                   HorizontalAlignment="Stretch"/>
+            
+            <!-- Separator -->
+            <Border Height="1" 
+                   Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                   Margin="0,20,0,20"/>
+            
+            <TextBlock Text="Tài khoản" 
+                      FontSize="20" 
+                      FontWeight="SemiBold"
+                      Margin="0,10,0,10"/>
+            
+            <Button Content="Đăng xuất" 
+                   Click="LogoutButton_Click"
+                   HorizontalAlignment="Stretch">
+                <Button.Resources>
+                    <SolidColorBrush x:Key="ButtonBackground" Color="#DC3545"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#C82333"/>
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#BD2130"/>
+                    <SolidColorBrush x:Key="ButtonForeground" Color="White"/>
+                </Button.Resources>
+            </Button>
+            
+            <TextBlock Text="Các cài đặt khác sẽ được implement trong tuần 5" 
+                      Foreground="Gray"
+                      Margin="0,20,0,0"/>
         </StackPanel>
     </ScrollViewer>
 </Page>

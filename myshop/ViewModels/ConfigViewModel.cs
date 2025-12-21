@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using myshop.Helpers;
 using myshop.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace myshop.ViewModels;
@@ -10,11 +11,13 @@ public partial class ConfigViewModel : ObservableObject
 {
     private readonly DatabaseConfigService _configService;
     private readonly DatabaseTestService _testService;
+    private readonly NavigationService _navigationService;
 
-    public ConfigViewModel(DatabaseConfigService configService, DatabaseTestService testService)
+    public ConfigViewModel(DatabaseConfigService configService, DatabaseTestService testService, NavigationService navigationService)
     {
         _configService = configService;
         _testService = testService;
+        _navigationService = navigationService;
 
         _ = LoadConfigAsync();
     }
@@ -24,28 +27,28 @@ public partial class ConfigViewModel : ObservableObject
     // =========================
 
     [ObservableProperty]
-    private string serverHost;
+    private string serverHost = string.Empty;
 
     [ObservableProperty]
     private int port;
 
     [ObservableProperty]
-    private string databaseName;
+    private string databaseName = string.Empty;
 
     [ObservableProperty]
-    private string username;
+    private string username = string.Empty;
 
     [ObservableProperty]
-    private string password;
+    private string password = string.Empty;
 
     [ObservableProperty]
     private bool isLoading;
 
     [ObservableProperty]
-    private string errorMessage;
+    private string errorMessage = string.Empty;
 
     [ObservableProperty]
-    private string successMessage;
+    private string successMessage = string.Empty;
 
     // =========================
     // COMMANDS
@@ -75,7 +78,8 @@ public partial class ConfigViewModel : ObservableObject
         await _configService.SaveConfigAsync(config);
 
         IsLoading = false;
-        SuccessMessage = "Configuration saved successfully.";
+        var filePath = await _configService.GetConfigFilePathAsync();
+        SuccessMessage = $"Đã lưu cấu hình thành công!\nFile: {filePath}";
     }
 
     [RelayCommand]
@@ -105,12 +109,33 @@ public partial class ConfigViewModel : ObservableObject
 
         if (!success)
         {
-            ErrorMessage = error ?? "Cannot connect to database.";
+            ErrorMessage = error ?? "Không thể kết nối đến database.";
         }
         else
         {
-            SuccessMessage = "Connection successful.";
+            SuccessMessage = "Kết nối thành công!";
         }
+    }
+
+    [RelayCommand]
+    private async Task OpenConfigFileAsync()
+    {
+        try
+        {
+            var filePath = await _configService.GetConfigFilePathAsync();
+            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+            await Windows.System.Launcher.LaunchFileAsync(file);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Không thể mở file: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        _navigationService.GoBack();
     }
 
     // =========================
@@ -122,12 +147,19 @@ public partial class ConfigViewModel : ObservableObject
         var config = await _configService.LoadConfigAsync();
 
         if (config == null)
+        {
+            // Set default values
+            ServerHost = "localhost";
+            Port = 5432;
+            DatabaseName = "myshop_db";
+            Username = "postgres";
             return;
+        }
 
-        ServerHost = config.Host;
-        Port = config.Port;
-        DatabaseName = config.Database;
-        Username = config.Username;
+        ServerHost = config.Host ?? "localhost";
+        Port = config.Port > 0 ? config.Port : 5432;
+        DatabaseName = config.Database ?? "myshop_db";
+        Username = config.Username ?? "postgres";
 
         if (!string.IsNullOrEmpty(config.Password))
         {
@@ -141,7 +173,13 @@ public partial class ConfigViewModel : ObservableObject
             string.IsNullOrWhiteSpace(DatabaseName) ||
             string.IsNullOrWhiteSpace(Username))
         {
-            ErrorMessage = "Please fill all required fields.";
+            ErrorMessage = "Vui lòng điền đầy đủ các trường bắt buộc.";
+            return false;
+        }
+
+        if (Port < 1 || Port > 65535)
+        {
+            ErrorMessage = "Port phải nằm trong khoảng 1-65535.";
             return false;
         }
 

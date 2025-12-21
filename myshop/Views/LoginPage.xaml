@@ -5,7 +5,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:myshop.Helpers"
     mc:Ignorable="d">
+    
+    <Page.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <helpers:BoolNegationConverter x:Key="BoolNegationConverter"/>
+        <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -31,7 +38,7 @@
 
         <!-- Right side: Login Form -->
         <Grid Grid.Column="1" Padding="40">
-            <StackPanel VerticalAlignment="Center">
+            <StackPanel VerticalAlignment="Center" Spacing="20">
                 <TextBlock Text="Đăng nhập" 
                           FontSize="32" 
                           FontWeight="Bold"
@@ -39,18 +46,34 @@
                 
                 <TextBox x:Name="UsernameTextBox" 
                         Header="Tên đăng nhập" 
-                        PlaceholderText="Nhập tên đăng nhập"/>
+                        PlaceholderText="Nhập tên đăng nhập"
+                        Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
+                        IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
                 
                 <PasswordBox x:Name="PasswordBox" 
                             Header="Mật khẩu" 
-                            PlaceholderText="Nhập mật khẩu"/>
+                            PlaceholderText="Nhập mật khẩu"
+                            PasswordChanged="PasswordBox_PasswordChanged"
+                            IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
+                
+                <!-- Error Message -->
+                <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                          Foreground="Red"
+                          TextWrapping="Wrap"
+                          Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+                
+                <!-- Loading Indicator -->
+                <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                            HorizontalAlignment="Center"/>
                 
                 <Button Content="Đăng nhập" 
-                       Click="LoginButton_Click"
+                       Command="{x:Bind ViewModel.LoginCommand}"
+                       IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
                        HorizontalAlignment="Stretch"/>
                 
                 <HyperlinkButton Content="Cấu hình server" 
-                               Click="ConfigButton_Click"
+                               Command="{x:Bind ViewModel.NavigateToConfigCommand}"
                                HorizontalAlignment="Center"/>
                 
                 <TextBlock x:Name="VersionTextBlock" 
@@ -58,7 +81,7 @@
                           FontSize="12" 
                           Foreground="Gray"
                           HorizontalAlignment="Center"
-                          Margin="0,40,0,0"/>
+                          Margin="0,20,0,0"/>
             </StackPanel>
         </Grid>
     </Grid>

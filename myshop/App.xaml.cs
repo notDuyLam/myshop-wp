@@ -43,8 +43,8 @@ namespace myshop
             services.AddSingleton<DatabaseConfigService>();
             services.AddSingleton<DatabaseTestService>();
 
-            // DbContext will be registered later when we have connection string
-            // For now, we'll create it on-demand in services
+            // Register ViewModels
+            services.AddTransient<LoginViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<ProductsViewModel>();
 
@@ -57,7 +57,7 @@ namespace myshop
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow();
+            _window = new LoginWindow();
             _window.Activate();
         }
     }

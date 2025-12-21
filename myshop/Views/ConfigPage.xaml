@@ -5,48 +5,86 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:myshop.Helpers"
     mc:Ignorable="d">
+    
+    <Page.Resources>
+        <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <helpers:BoolNegationConverter x:Key="BoolNegationConverter"/>
+    </Page.Resources>
 
     <ScrollViewer>
-        <StackPanel Padding="40" MaxWidth="600">
-            <TextBlock Text="Cấu hình Server" 
-                      FontSize="32" 
-                      FontWeight="Bold"/>
+        <StackPanel Padding="40" MaxWidth="600" Spacing="20">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="← Quay lại" 
+                       Command="{x:Bind ViewModel.GoBackCommand}"
+                       Style="{StaticResource SubtleButtonStyle}"/>
+                <TextBlock Text="Cấu hình Server" 
+                          FontSize="32" 
+                          FontWeight="Bold"
+                          VerticalAlignment="Center"/>
+            </StackPanel>
             
             <TextBox x:Name="ServerHostTextBox" 
                     Header="Server IP/Hostname" 
-                    PlaceholderText="localhost"/>
+                    PlaceholderText="localhost"
+                    Text="{x:Bind ViewModel.ServerHost, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             
             <TextBox x:Name="PortTextBox" 
                     Header="Port" 
-                    PlaceholderText="5432"/>
+                    PlaceholderText="5432"
+                    TextChanged="PortTextBox_TextChanged"
+                    IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             
             <TextBox x:Name="DatabaseNameTextBox" 
                     Header="Tên Database" 
-                    PlaceholderText="myshop_db"/>
+                    PlaceholderText="myshop_db"
+                    Text="{x:Bind ViewModel.DatabaseName, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             
             <TextBox x:Name="UsernameTextBox" 
                     Header="Username" 
-                    PlaceholderText="postgres"/>
+                    PlaceholderText="postgres"
+                    Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
+                    IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             
             <PasswordBox x:Name="PasswordBox" 
                         Header="Password" 
-                        PlaceholderText="Nhập password"/>
+                        PlaceholderText="Nhập password"
+                        PasswordChanged="PasswordBox_PasswordChanged"
+                        IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             
-            <StackPanel Orientation="Horizontal">
+            <!-- Loading Indicator -->
+            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                        HorizontalAlignment="Center"/>
+            
+            <StackPanel Orientation="Horizontal" Spacing="10">
                 <Button Content="Test kết nối" 
-                       Click="TestConnectionButton_Click"/>
+                       Command="{x:Bind ViewModel.TestConnectionCommand}"
+                       IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
                 <Button Content="Lưu cấu hình" 
-                       Click="SaveButton_Click"
-                       Style="{StaticResource AccentButtonStyle}"/>
+                       Command="{x:Bind ViewModel.SaveConfigCommand}"
+                       Style="{StaticResource AccentButtonStyle}"
+                       IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
                 <Button Content="Mở file config" 
-                       Click="OpenConfigFileButton_Click"
-                       Margin="10,0,0,0"/>
+                       Command="{x:Bind ViewModel.OpenConfigFileCommand}"
+                       IsEnabled="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"/>
             </StackPanel>
             
-            <TextBlock x:Name="StatusTextBlock" 
+            <!-- Error Message -->
+            <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
                       Foreground="Red"
-                      TextWrapping="Wrap"/>
+                      TextWrapping="Wrap"
+                      Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            
+            <!-- Success Message -->
+            <TextBlock Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}"
+                      Foreground="Green"
+                      TextWrapping="Wrap"
+                      Visibility="{x:Bind ViewModel.SuccessMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
             
             <TextBlock Text="Bạn có thể chỉnh sửa file database.json trực tiếp bằng Notepad hoặc bất kỳ text editor nào."
                       FontSize="12"
