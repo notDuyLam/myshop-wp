@@ -1,29 +1,33 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.EntityFrameworkCore;
+using myshop.Services;
 using myshop_data.Data;
 using myshop_data.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace myshop.ViewModels;
 
 public partial class ProductsViewModel : ObservableObject
 {
-    private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
+    private readonly DbContextService _dbContextService;
+    private CancellationTokenSource? _cancellationTokenSource;
 
-    public ProductsViewModel(
-        IDbContextFactory<AppDbContext> dbContextFactory)
+    public ProductsViewModel(DbContextService dbContextService)
     {
-        _dbContextFactory = dbContextFactory;
+        _dbContextService = dbContextService;
+        _cancellationTokenSource = new CancellationTokenSource();
 
         Products = new ObservableCollection<Product>();
         Categories = new ObservableCollection<Category>();
 
-        _ = InitializeAsync();
+        // Wrap trong try-catch để tránh crash khi app đóng
+        _ = SafeInitializeAsync();
     }
 
     // =========================
@@ -59,13 +63,14 @@ public partial class ProductsViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadProductsAsync()
     {
+        if (_cancellationTokenSource?.Token.IsCancellationRequested == true) return;
+
         ErrorMessage = null;
         IsLoading = true;
 
         try
         {
-            await using var context =
-                await _dbContextFactory.CreateDbContextAsync();
+            await using var context = await _dbContextService.CreateDbContextAsync();
 
             IQueryable<Product> query = context.Products
                 .Include(p => p.Category)
@@ -92,21 +97,26 @@ public partial class ProductsViewModel : ObservableObject
                 _ => query.OrderBy(p => p.Name)
             };
 
-            var totalItems = await query.CountAsync();
+            var totalItems = await query.CountAsync(_cancellationTokenSource?.Token ?? default);
             TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
 
             var items = await query
                 .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
-                .ToListAsync();
+                .ToListAsync(_cancellationTokenSource?.Token ?? default);
 
             Products.Clear();
             foreach (var p in items)
                 Products.Add(p);
         }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore if cancelled or disposed
+        }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
+            System.Diagnostics.Debug.WriteLine($"Error loading products: {ex.Message}");
         }
         finally
         {
@@ -117,46 +127,58 @@ public partial class ProductsViewModel : ObservableObject
     [RelayCommand]
     private async Task AddProductAsync()
     {
-        if (SelectedProduct == null) return;
+        if (SelectedProduct == null || _cancellationTokenSource?.Token.IsCancellationRequested == true) return;
 
-        await using var context =
-            await _dbContextFactory.CreateDbContextAsync();
-
-        context.Products.Add(SelectedProduct);
-        await context.SaveChangesAsync();
-        await LoadProductsAsync();
+        try
+        {
+            await using var context = await _dbContextService.CreateDbContextAsync();
+            context.Products.Add(SelectedProduct);
+            await context.SaveChangesAsync(_cancellationTokenSource?.Token ?? default);
+            await LoadProductsAsync();
+        }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore
+        }
     }
 
     [RelayCommand]
     private async Task EditProductAsync()
     {
-        if (SelectedProduct == null) return;
+        if (SelectedProduct == null || _cancellationTokenSource?.Token.IsCancellationRequested == true) return;
 
-        await using var context =
-            await _dbContextFactory.CreateDbContextAsync();
-
-        context.Products.Update(SelectedProduct);
-        await context.SaveChangesAsync();
-        await LoadProductsAsync();
+        try
+        {
+            await using var context = await _dbContextService.CreateDbContextAsync();
+            context.Products.Update(SelectedProduct);
+            await context.SaveChangesAsync(_cancellationTokenSource?.Token ?? default);
+            await LoadProductsAsync();
+        }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore
+        }
     }
 
     [RelayCommand]
     private async Task DeleteProductAsync()
     {
-        if (SelectedProduct == null) return;
+        if (SelectedProduct == null || _cancellationTokenSource?.Token.IsCancellationRequested == true) return;
 
         try
         {
-            await using var context =
-                await _dbContextFactory.CreateDbContextAsync();
-
+            await using var context = await _dbContextService.CreateDbContextAsync();
             context.Products.Remove(SelectedProduct);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_cancellationTokenSource?.Token ?? default);
             await LoadProductsAsync();
         }
         catch (DbUpdateException)
         {
             ErrorMessage = "Product is referenced by orders.";
+        }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore
         }
     }
 
@@ -164,24 +186,59 @@ public partial class ProductsViewModel : ObservableObject
     // INIT
     // =========================
 
+    private async Task SafeInitializeAsync()
+    {
+        try
+        {
+            await InitializeAsync();
+        }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore if app is closing
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in InitializeAsync: {ex.Message}");
+            ErrorMessage = "Không thể tải dữ liệu ban đầu.";
+        }
+    }
+
     private async Task InitializeAsync()
     {
+        if (_cancellationTokenSource?.Token.IsCancellationRequested == true) return;
+
         await LoadCategoriesAsync();
         await LoadProductsAsync();
     }
 
     private async Task LoadCategoriesAsync()
     {
-        await using var context =
-            await _dbContextFactory.CreateDbContextAsync();
+        if (_cancellationTokenSource?.Token.IsCancellationRequested == true) return;
 
-        var list = await context.Categories
-            .OrderBy(c => c.Name)
-            .AsNoTracking()
-            .ToListAsync();
+        try
+        {
+            await using var context = await _dbContextService.CreateDbContextAsync();
 
-        Categories.Clear();
-        foreach (var c in list)
-            Categories.Add(c);
+            var list = await context.Categories
+                .OrderBy(c => c.Name)
+                .AsNoTracking()
+                .ToListAsync(_cancellationTokenSource?.Token ?? default);
+
+            Categories.Clear();
+            foreach (var c in list)
+                Categories.Add(c);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
+        {
+            // Ignore
+        }
+    }
+
+    // Dispose để cancel tất cả operations
+    public void Cancel()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
     }
 }

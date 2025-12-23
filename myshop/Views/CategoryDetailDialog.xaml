@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="myshop.Views.CategoryDetailDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  mc:Ignorable="d"
+    Title="Chi tiết danh mục"
+    PrimaryButtonText="Lưu"
+    CloseButtonText="Hủy"
+    DefaultButton="Primary"
+    Style="{StaticResource DefaultContentDialogStyle}">
+
+    <StackPanel Spacing="16" MinWidth="400">
+        <!-- Category Name -->
+  <StackPanel>
+   <TextBlock Text="Tên danh mục *" 
+     FontWeight="SemiBold"
+           Margin="0,0,0,8"/>
+            <TextBox x:Name="CategoryNameTextBox"
+   PlaceholderText="Nhập tên danh mục"
+           MaxLength="100"/>
+   </StackPanel>
+
+        <!-- Description -->
+        <StackPanel>
+         <TextBlock Text="Mô tả" 
+        FontWeight="SemiBold"
+   Margin="0,0,0,8"/>
+    <TextBox x:Name="DescriptionTextBox"
+         PlaceholderText="Nhập mô tả danh mục"
+      TextWrapping="Wrap"
+  AcceptsReturn="True"
+        Height="100"
+   MaxLength="500"/>
+  </StackPanel>
+
+        <!-- Icon Selection -->
+        <StackPanel>
+ <TextBlock Text="Icon" 
+        FontWeight="SemiBold"
+        Margin="0,0,0,8"/>
+        <ComboBox x:Name="IconComboBox"
+    HorizontalAlignment="Stretch"
+           PlaceholderText="Chọn icon"
+        SelectedIndex="0">
+ <ComboBoxItem>
+       <StackPanel Orientation="Horizontal" Spacing="8">
+     <FontIcon Glyph="&#xE7F8;"/>
+           <TextBlock Text="Điện tử"/>
+      </StackPanel>
+    </ComboBoxItem>
+            <ComboBoxItem>
+  <StackPanel Orientation="Horizontal" Spacing="8">
+              <FontIcon Glyph="&#xE7C8;"/>
+  <TextBlock Text="Thời trang"/>
+      </StackPanel>
+              </ComboBoxItem>
+          <ComboBoxItem>
+         <StackPanel Orientation="Horizontal" Spacing="8">
+         <FontIcon Glyph="&#xE80F;"/>
+        <TextBlock Text="Gia dụng"/>
+    </StackPanel>
+            </ComboBoxItem>
+                <ComboBoxItem>
+     <StackPanel Orientation="Horizontal" Spacing="8">
+               <FontIcon Glyph="&#xE7BC;"/>
+  <TextBlock Text="Thực phẩm"/>
+        </StackPanel>
+    </ComboBoxItem>
+  <ComboBoxItem>
+           <StackPanel Orientation="Horizontal" Spacing="8">
+         <FontIcon Glyph="&#xE734;"/>
+    <TextBlock Text="Mặc định"/>
+             </StackPanel>
+        </ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Required Fields Note -->
+        <TextBlock Text="* Trường bắt buộc" 
+       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+         FontSize="12"
+    FontStyle="Italic"
+      Margin="0,8,0,0"/>
+    </StackPanel>
+</ContentDialog>
