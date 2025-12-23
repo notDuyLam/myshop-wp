@@ -14,32 +14,54 @@
     </Window.SystemBackdrop>
 
     <Grid>
-        <NavigationView x:Name="NavView" 
-                       PaneDisplayMode="Left"
-                       IsBackButtonVisible="Collapsed"
-                       IsSettingsVisible="False"
-                       SelectionChanged="NavView_SelectionChanged">
+        <NavigationView x:Name="NavView"
+                        PaneDisplayMode="Left"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        IsPaneToggleButtonVisible="True"
+                        OpenPaneLength="280"
+                        CompactModeThresholdWidth="1008"
+                        ExpandedModeThresholdWidth="1008"
+                        SelectionChanged="NavView_SelectionChanged">
+
+            <!-- Header/Branding --><!--
+            <NavigationView.PaneHeader>
+            <Grid Height="48" Margin="12,8">
+            <TextBlock Text="MyShop"
+            FontSize="18"
+            FontWeight="SemiBold"
+            VerticalAlignment="Center"/>
+            </Grid>
+            </NavigationView.PaneHeader>-->
+
+            <!-- Menu Items -->
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Dashboard" Tag="Dashboard">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE10F;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
                 <NavigationViewItem Content="Sản phẩm" Tag="Products">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D1;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
                 <NavigationViewItem Content="Đơn hàng" Tag="Orders">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8CA;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
+                <NavigationViewItemSeparator />
+
                 <NavigationViewItem Content="Báo cáo" Tag="Report">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8A5;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
                 <NavigationViewItem Content="Cài đặt" Tag="Settings">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE713;" />
@@ -47,7 +69,19 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" />
+            <!-- Content Frame -->
+            <Frame x:Name="ContentFrame">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition>
+                            <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                                <EntranceNavigationTransitionInfo />
+                            </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                        </NavigationThemeTransition>
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
+
         </NavigationView>
     </Grid>
 </Window>
