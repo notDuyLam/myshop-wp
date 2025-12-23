@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using myshop_data.Models;
 
 namespace myshop_data.Data;
@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         
         // Configure table names (PostgreSQL uses lowercase)
+        modelBuilder.Entity<Category>().ToTable("category");
+        modelBuilder.Entity<Product>().ToTable("product");
         modelBuilder.Entity<Order>().ToTable("order");
         modelBuilder.Entity<OrderItem>().ToTable("order_item");
         
