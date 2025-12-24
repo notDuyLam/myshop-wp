@@ -24,15 +24,8 @@ public sealed partial class LoginWindow : Microsoft.UI.Xaml.Window
         // Register this window with WindowHelper
         WindowHelper.RegisterWindow(this);
 
-        // Set window size (WinUI 3 requires setting size in code-behind)
-        var hWnd = WindowNative.GetWindowHandle(this);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = AppWindow.GetFromWindowId(windowId);
-        
-        if (appWindow != null)
-        {
-            appWindow.Resize(new SizeInt32(900, 600));
-        }
+        // Set window size và icon
+        SetupWindow();
 
         // Get NavigationService from DI
         _navigationService = App.ServiceProvider?.GetService<NavigationService>()
@@ -43,6 +36,32 @@ public sealed partial class LoginWindow : Microsoft.UI.Xaml.Window
 
         // Navigate to LoginPage
         _navigationService.NavigateTo(typeof(LoginPage));
+    }
+
+    /// <summary>
+    /// Thiết lập window size và icon
+    /// </summary>
+    private void SetupWindow()
+    {
+        try
+        {
+            var hWnd = WindowNative.GetWindowHandle(this);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+            var appWindow = AppWindow.GetFromWindowId(windowId);
+
+            if (appWindow != null)
+            {
+                // Set window size
+                appWindow.Resize(new SizeInt32(900, 600));
+
+                // ✅ Set icon cho title bar
+                appWindow.SetIcon("Assets/app.ico");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to setup window: {ex.Message}");
+        }
     }
 }
 

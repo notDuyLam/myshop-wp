@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
+using myshop.Helpers;
 
 namespace myshop.Services;
 
@@ -142,6 +143,10 @@ public class DatabaseConfigService
             {
                 return DefaultConfig.ToConnectionString();
             }
+            // Giải mã password trước khi tạo connection string
+            var decryptedPassword = await EncryptionHelper.DecryptAsync(config.Password);
+            config.Password = decryptedPassword;
+
             return config.ToConnectionString();
         }
         catch

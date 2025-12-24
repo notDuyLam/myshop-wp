@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="myshop.Views.CategoryManagementDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d"
+    Title="Quản lý Danh mục"
+    CloseButtonText="Đóng"
+    DefaultButton="Close"
+    Style="{StaticResource DefaultContentDialogStyle}">
+
+    <Grid MinWidth="600" MinHeight="500">
+     <Grid.RowDefinitions>
+  <RowDefinition Height="Auto"/>
+       <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+     <!-- Action Buttons -->
+        <StackPanel Grid.Row="0" 
+ Orientation="Horizontal" 
+ Spacing="12"
+   Margin="0,0,0,16">
+      <Button x:Name="AddCategoryButton"
+    Style="{StaticResource AccentButtonStyle}">
+         <StackPanel Orientation="Horizontal" Spacing="8">
+    <FontIcon Glyph="&#xE710;"/>
+         <TextBlock Text="Thêm danh mục"/>
+    </StackPanel>
+    </Button>
+       <Button x:Name="EditCategoryButton">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+       <FontIcon Glyph="&#xE70F;"/>
+  <TextBlock Text="Sửa"/>
+            </StackPanel>
+         </Button>
+     <Button x:Name="DeleteCategoryButton">
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <FontIcon Glyph="&#xE74D;"/>
+ <TextBlock Text="Xóa"/>
+       </StackPanel>
+     </Button>
+    </StackPanel>
+
+        <!-- Categories DataGrid -->
+        <Border Grid.Row="1"
+           Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+          CornerRadius="8">
+            <controls:DataGrid x:Name="CategoriesDataGrid"
+       AutoGenerateColumns="False"
+        CanUserReorderColumns="False"
+  CanUserResizeColumns="True"
+    GridLinesVisibility="Horizontal"
+   HeadersVisibility="Column"
+ SelectionMode="Single"
+             AlternatingRowBackground="{ThemeResource SubtleFillColorSecondaryBrush}">
+    <controls:DataGrid.Columns>
+      <controls:DataGridTextColumn Header="Mã danh mục" 
+   Binding="{Binding CategoryId}"
+  Width="120"
+            IsReadOnly="True"/>
+    <controls:DataGridTextColumn Header="Tên danh mục" 
+     Binding="{Binding Name}"
+         Width="2*"/>
+     <controls:DataGridTextColumn Header="Mô tả" 
+    Binding="{Binding Description}"
+Width="3*"/>
+  <controls:DataGridTextColumn Header="Số sản phẩm" 
+ Binding="{Binding Products.Count}"
+       Width="120"
+     IsReadOnly="True"/>
+       </controls:DataGrid.Columns>
+      </controls:DataGrid>
+  </Border>
+    </Grid>
+</ContentDialog>
